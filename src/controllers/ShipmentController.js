@@ -84,16 +84,17 @@ async function createShipment(req, res) {
 
 async function updateShipmentLocation(req, res) {
     try {
-        const id = req.params.shipmentId; 
-        const { locationName, latitude, longitude } = req.body;
+        const { shipmentId } = req.params; // Fetch shipmentId from URL
+        const { locationName, latitude, longitude } = req.body; // Extract new location details
 
-
+        // Validate input
         if (!locationName || latitude === undefined || longitude === undefined) {
             return res.status(400).json({ message: "Please provide all location details" });
         }
 
-        const shipment = await Shipment.findByIdAndUpdate(
-            id,
+        // Find shipment by shipmentId and update location
+        const shipment = await Shipment.findOneAndUpdate(
+            { shipmentId },  // Query to match shipmentId field
             {
                 $set: {
                     "currentLocation.locationName": locationName,
@@ -102,7 +103,7 @@ async function updateShipmentLocation(req, res) {
                     "currentLocation.updatedAt": Date.now(),
                 }
             },
-            { new: true }
+            { new: true } // Return updated document
         );
 
         if (!shipment) {
@@ -120,7 +121,30 @@ async function updateShipmentLocation(req, res) {
     }
 }
 
+async function retrieveEstimatedTime(req, res) {
+    try {
+        const id = req.params.shipmentId; 
+        
+        const shipment= await Shipment.findOne({"shipmentId":id});
+
+        if (!shipment) {
+            return res.status(404).json({ message: "Shipment not found" });
+        }
+        const eta=shipment.eta;
+
+        if(!eta){
+            return res.status(404).json({message:"No eta for the shipment found"});
+        }
+        res.status(200).json({
+            message: "Shipment eta fetched successfully",
+            eta
+        });
+    } catch (error) {
+        console.error("Error fetching shipment eta details:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
 
 module.exports={
-    fetchAllShipments,fetchShipment,createShipment,updateShipmentLocation
+    fetchAllShipments,fetchShipment,createShipment,updateShipmentLocation,retrieveEstimatedTime
 };
