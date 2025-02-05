@@ -5,11 +5,17 @@ const mongoose=require("mongoose");
 const express = require("express");
 const { connectMongoDb } = require("./connection");
 
+
+const shipmentRoutes = require("./src/routes/ShipmentRoutes.js");
+
 connectMongoDb(process.env.MONGO_URL)
   .then(() => console.log("MongoDB Connected!"));
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+
+app.use("/",shipmentRoutes);
 
 app.use(cors());
 app.use(express.json());
