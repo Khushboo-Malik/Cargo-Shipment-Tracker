@@ -18,6 +18,24 @@ async function fetchAllShipments(req, res) {
     }
 }
 
+async function fetchShipment(req, res) {
+    try {
+        const id=req.params.shipmentId;
+        const shipment = await Shipment.findOne({"shipmentId":id});
+
+        if (!shipment) {
+            return res.status(404).json({ message: "No such shipment found" });
+        }
+
+        res.status(200).json({
+            message: "Shipment Details fetched successfully",shipment});
+
+    } catch (error) {
+        console.error("Error in fetching shipment details", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 module.exports={
-    fetchAllShipments
+    fetchAllShipments,fetchShipment
 };
